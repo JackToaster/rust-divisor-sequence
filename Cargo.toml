@@ -1,0 +1,12 @@
+[package]
+name = "divisor_series"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+galil-seiferas = "0.1.5"
+rayon = "1.7.0"
+num-traits = "0.2.15"
+prime-factor = "0.4.3"
