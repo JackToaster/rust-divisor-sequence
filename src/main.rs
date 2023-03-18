@@ -1,5 +1,6 @@
 
 use std::{time::Instant, cmp::min, fs::File, io::Write, sync::Arc};
+use std::collections::HashMap;
 use galil_seiferas::gs_find;
 use rayon::{prelude::{IntoParallelIterator, ParallelIterator}, vec};
 use primefactor::PrimeFactors;
@@ -126,6 +127,16 @@ fn binary_repeat_search<T>(seq: &Vec<T>, m: usize) -> usize
 
 }
 
+fn mode(elements: &[u16]) -> u16
+{
+    let mut element_count = HashMap::new();
+    for num in elements {
+        let count = element_count.entry(num).or_insert(0);
+        *count += 1;
+    }
+    return **element_count.iter().max_by_key(|entry| entry.1).unwrap().0;
+}
+
 fn main() {
     // Set the maximum sequence length before giving up.
     // WARNING: 100,000,000 will take a long time (half an hour or more, depending on your computer)
@@ -142,7 +153,7 @@ fn main() {
     let mut file = File::create("results_500.csv").unwrap();
     // write header to file
     let mut w = Vec::new();
-    write!(w, "m, repeat_after, max_value\n").unwrap();
+    write!(w, "m, repeat_after, max_value, most_common_value_in_tail\n").unwrap();
     file.write(&w).unwrap();
 
     // Record start time
@@ -171,11 +182,11 @@ fn main() {
             let mut w = Vec::new();
             if let Some(_rep_seq) = &result.repeated {
                 let max_val = result.sequence.iter().max().unwrap();
-                println!("R(n,{}): Repeated @ n={}. Max val: {}.", m, result.repeated_at.unwrap(), max_val);
+                let mode = mode(&result.sequence[result.repeated_at.unwrap() - m .. result.sequence.len() - m]);
                 // Warning - sequences can be very long! printing them might be a bad idea.
                 // println!("  sequence: {:?}", result.sequence);
 
-                write!(w, "{}, {}, {}\n", m, result.repeated_at.unwrap(), max_val).unwrap();
+                write!(w, "{}, {}, {}, {}\n", m, result.repeated_at.unwrap(), max_val, mode).unwrap();
             } else {
                 println!("R(n,{})", m);
                 println!("!!!!  No repeat for n<{}", max_length);
